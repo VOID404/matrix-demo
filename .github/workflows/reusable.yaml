@@ -1,0 +1,21 @@
+on:
+  workflow_call:
+    inputs:
+      foo:
+        required: true
+        type: string
+      bar:
+        required: true
+        type: string
+
+jobs:
+  reuseme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo
+        env:
+          BAR: ${{ inputs.bar }}
+          FOO: ${{ inputs.foo }}
+        run: |
+          echo "bar: $BAR"
+          echo "foo: $FOO"

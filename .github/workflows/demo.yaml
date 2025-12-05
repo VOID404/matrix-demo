@@ -6,6 +6,11 @@ name: Matrix workflow
 on: push
 
 jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
   gather-data:
     runs-on: ubuntu-latest
     outputs:
@@ -20,12 +25,12 @@ jobs:
           } > components.json
           echo components=$(jq -c --slurp '.' components.json) > $GITHUB_OUTPUT
 
-  slack-post:
+  dora-integration:
     needs: gather-data
-    runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
     strategy:
       matrix:
         include: ${{ fromJSON(needs.gather-data.outputs.values) }}
-    steps:
-      - run: echo ${{ matrix.foo }} ${{ matrix.bar }}
+    uses: ./.github/workflows/reusable.yaml
+    with:
+      foo: ${{ matrix.foo }}
+      bar: ${{ matrix.bar }}
