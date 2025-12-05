@@ -9,51 +9,23 @@ jobs:
   gather-data:
     runs-on: ubuntu-latest
     outputs:
-      values: ${{ steps.diff-files.outputs.changed-files }}
+      values: ${{ steps.diff-files.outputs.components }}
     steps:
       - name: git diff
         id: diff-files
         run: |
-          echo 'changed-files=["foo/values.yaml", "bar/values.yaml", "baz/values.yaml"]' >> "$GITHUB_OUTPUT"
-  gather-more-data:
-    runs-on: ubuntu-latest
-    needs: gather-data
-    strategy:
-      fail-fast: false
-      matrix:
-        file: ${{ fromJSON(needs.gather-data.outputs.values) }}
-    steps:
-      - name: gather-more-data
-        env:
-          file: ${{ matrix.file }}
-        run: |
-          component=${file%%/values.yaml}
-          other="I am a $component"
-          jq -nc '{component: env.component, other: env.other}' | tee outcome
-      - name: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ hashFiles('outcome') }}
-          path: outcome
-
-  collect:
-    needs: gather-data
-    runs-on: ubuntu-latest
-    outputs:
-      outcomes: ${{ steps.collect.outputs.outcomes }}
-    steps:
-      - uses: actions/download-artifact@v4
-      - id: collect
-        run: |
-          outcomes="$(cat */outcome | jq -c --slurp .)"
-          echo outcomes=$outcomes >> $GITHUB_OUTPUT
+          {
+            echo '{"foo": 10, "bar": 20}'
+            echo '{"foo": 12, "bar": 22}'
+          } > components.json
+          echo components=$(jq -c --slurp '.' components.json) > $GITHUB_OUTPUT
 
   slack-post:
-    needs: collect
+    needs: gather-data
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     strategy:
       matrix:
-        include: ${{ fromJSON(needs.collect.outputs.outcomes) }}
+        include: ${{ fromJSON(needs.gather-data.outputs.values) }}
     steps:
-      - run: echo ${{ matrix.component }} ${{ matrix.other }}
+      - run: echo ${{ matrix.foo }} ${{ matrix.bar }}
