@@ -1,0 +1,21 @@
+name: PR workflow
+on: workflow_dispatch
+
+jobs:
+  demo:
+    permissions:
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+      - name: modify files
+        run: |
+          echo "# Example" > new_file.md
+      - name: create PR
+        uses: peter-evans/create-pull-request@v8
+      - name: inspect files
+        run: |
+          cat new_file.md
