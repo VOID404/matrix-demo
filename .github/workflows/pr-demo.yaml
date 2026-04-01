@@ -15,7 +15,12 @@ jobs:
         run: |
           echo "# Example" > new_file.md
       - name: create PR
+        id: pr
         uses: peter-evans/create-pull-request@v8
+      - name: checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.pr.outputs.pull-request-branch }}
       - name: inspect files
         run: |
           cat new_file.md
