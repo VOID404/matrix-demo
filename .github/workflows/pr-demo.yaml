@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - name: modify files
-        run: |
-          echo "# Example" > new_file.md
+      # - name: modify files
+      #   run: |
+      #     echo "# Example" > new_file.md
       - name: create PR
         id: pr
         uses: peter-evans/create-pull-request@v8
